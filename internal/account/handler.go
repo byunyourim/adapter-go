@@ -6,21 +6,21 @@ import (
 	"fmt"
 )
 
-// KafkaHandler 는 account 관련 Kafka 메시지를 디코드해 Service로 라우팅한다.
+// KafkaHandler account 관련 Kafka 메시지를 디코드해 Service로 라우팅
 // (TS의 adapter/in/kafka/handlers/account-*.handler.ts 대응)
 //
-// 인바운드 어댑터는 역직렬화/검증만 담당하고 도메인 로직은 Service에 위임한다.
+// 인바운드 어댑터는 역직렬화/검증만 담당하고 도메인 로직은 Service에 위임.
 type KafkaHandler struct {
 	svc *Service
 }
 
-// NewKafkaHandler 는 핸들러를 만든다.
+// NewKafkaHandler 핸들러 생성
 func NewKafkaHandler(svc *Service) *KafkaHandler {
 	return &KafkaHandler{svc: svc}
 }
 
-// HandleDeployMessage 는 raw 메시지를 DeployCommand로 파싱해 처리한다.
-// platform/kafka.HandlerFunc 시그니처(func(ctx, []byte) error)와 호환된다.
+// HandleDeployMessage raw 메시지를 DeployCommand로 파싱해 처리
+// platform/kafka.HandlerFunc 시그니처(func(ctx, []byte) error)와 호환
 func (h *KafkaHandler) HandleDeployMessage(ctx context.Context, payload []byte) error {
 	var cmd DeployCommand
 	if err := json.Unmarshal(payload, &cmd); err != nil {

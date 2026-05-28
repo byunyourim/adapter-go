@@ -1,14 +1,103 @@
-// Package logger 는 구조화 로깅 팩토리다. (TS의 infra/logger 대응) log/slog 사용.
+// Package logger 구조화 로깅 제공 (TS의 infra/logger = pino 대응)
+//
+// 운영 로그는 ELK로 수집된다. 기존 TS 어댑터의 pino 출력 포맷에 맞춰 JSON 필드를 낸다:
+//   - level    : 문자열 라벨 (trace/debug/info/warn/error)  ← pino formatters.level
+//   - time     : KST ISO8601 문자열 "2006-01-02T15:04:05.000+09:00"
+//   - msg      : 메시지 (slog 기본 키 == pino)
+//   - module   : 로거(모듈) 이름  ← TS child({module})
+//   - pid, hostname : pino 기본 필드
+//
+// LOG_PRETTY 개발 모드에서는 사람이 읽는 text 핸들러(ELK용 아님)로 전환
 package logger
 
 import (
+	"io"
 	"log/slog"
 	"os"
+	"strings"
+	"time"
 )
 
-// New 는 name 필드가 붙은 JSON 구조화 로거를 만든다.
-//
-// TODO(골격): LOG_LEVEL 반영, request-context의 trace id 부착.
-func New(name string) *slog.Logger {
-	return slog.New(slog.NewJSONHandler(os.Stdout, nil)).With("logger", name)
+// kstLayout TS 어댑터 timestamp와 동일한 KST ISO 포맷
+const kstLayout = "2006-01-02T15:04:05.000-07:00"
+
+// kst KST 고정 오프셋(+09:00, DST 없음 — tzdata 의존 회피)
+var kst = time.FixedZone("KST", 9*60*60)
+
+var hostname = resolveHostname()
+
+// New TS 어댑터 pino 포맷과 동일한 구조화 로거 생성
+// level/pretty는 config(env)에서 받아 주입한다(process.env 직접 접근 금지 원칙).
+func New(module string, level slog.Level, pretty bool) *slog.Logger {
+	return build(os.Stdout, module, level, pretty)
+}
+
+// build writer를 받아 로거 생성(테스트에서 버퍼 주입용)
+func build(w io.Writer, module string, level slog.Level, pretty bool) *slog.Logger {
+	var h slog.Handler
+	if pretty {
+		h = slog.NewTextHandler(w, &slog.HandlerOptions{Level: level})
+	} else {
+		h = slog.NewJSONHandler(w, &slog.HandlerOptions{
+			Level:       level,
+			ReplaceAttr: pinoReplace,
+		})
+	}
+	return slog.New(h).With(
+		slog.String("module", module),
+		slog.Int("pid", os.Getpid()),
+		slog.String("hostname", hostname),
+	)
+}
+
+// ParseLevel LOG_LEVEL 문자열을 slog.Level로 변환(기본 info)
+// pino의 trace/fatal은 slog 대응 레벨이 없어 debug/error로 매핑
+func ParseLevel(s string) slog.Level {
+	switch strings.ToLower(strings.TrimSpace(s)) {
+	case "trace", "debug":
+		return slog.LevelDebug
+	case "warn", "warning":
+		return slog.LevelWarn
+	case "error", "fatal":
+		return slog.LevelError
+	default:
+		return slog.LevelInfo
+	}
+}
+
+// pinoReplace time/level 필드를 TS 어댑터(pino) 포맷으로 치환
+func pinoReplace(_ []string, a slog.Attr) slog.Attr {
+	switch a.Key {
+	case slog.TimeKey:
+		return slog.String(slog.TimeKey, a.Value.Time().In(kst).Format(kstLayout))
+	case slog.LevelKey:
+		lvl, _ := a.Value.Any().(slog.Level)
+		return slog.String(slog.LevelKey, pinoLabel(lvl))
+	default:
+		return a
+	}
+}
+
+// pinoLabel slog 레벨을 pino 문자열 라벨로 변환
+func pinoLabel(l slog.Level) string {
+	switch {
+	case l >= slog.LevelError:
+		return "error"
+	case l >= slog.LevelWarn:
+		return "warn"
+	case l >= slog.LevelInfo:
+		return "info"
+	case l >= slog.LevelDebug:
+		return "debug"
+	default:
+		return "trace"
+	}
+}
+
+func resolveHostname() string {
+	h, err := os.Hostname()
+	if err != nil {
+		return "unknown"
+	}
+	return h
 }

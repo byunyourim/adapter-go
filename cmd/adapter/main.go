@@ -1,4 +1,4 @@
-// Command adapter 는 입금/출금/정산/지갑 배포를 오케스트레이션하는 서비스다.
+// Command adapter 입금/출금/정산/지갑 배포를 오케스트레이션하는 서비스
 //
 // 인바운드: Listener로부터 WebSocket 입금 이벤트, Kafka 명령(출금/정산/계좌 등)
 // 아웃바운드: 블록체인(go-ethereum), 외부 번들러, Kafka 결과 발행, Redis 분산락

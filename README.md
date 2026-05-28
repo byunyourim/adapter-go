@@ -77,7 +77,7 @@ migrations/                    # Postgres 마이그레이션
 | ORM | **Ent** | 엔티티/관계 풍부한 어댑터 도메인에 적합. 타입 안전 코드 생성, 명시적 트랜잭션 |
 | 메시지 큐 | segmentio/kafka-go | 기존 kafkajs 대응. 컨슈머 그룹·offset 제어 |
 | 캐시/락 | redis/go-redis | 기존 ioredis 대응. 분산락(배포 nonce 격리) |
-| 로깅 | log/slog (표준) | 외부 의존 0, 구조화 |
+| 로깅 | log/slog (표준) | 외부 의존 0. 기존 TS 어댑터 pino 포맷에 맞춤(문자열 level, KST ISO time, module/pid/hostname) → ELK 인입 유지 |
 | 설정 | caarlos0/env | struct 태그 매핑(@ConfigurationProperties 감각) |
 | 마이그레이션 | Ent migrate (atlas) | 스키마를 Ent 코드로 정의 → 자동 마이그레이션 |
 
@@ -157,7 +157,8 @@ make build && make test
 | `BUNDLER_URL` | ✅ | — | 외부 번들러 URL |
 | `WS_LISTEN` | | :8080 | Listener WS 수신 주소 |
 | `DEPLOY_LOCK_TTL_MS` | | 30000 | 배포 분산락 TTL |
-| `LOG_LEVEL` | | info | 로그 레벨 |
+| `LOG_LEVEL` | | debug | 로그 레벨 (trace/debug/info/warn/error/fatal) |
+| `LOG_PRETTY` | | true | 개발용 text 출력. 운영(ELK)은 false → pino 포맷 JSON |
 
 ---
 
