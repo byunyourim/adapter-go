@@ -78,6 +78,15 @@ func TestClassifyResponse_StructuredFields(t *testing.T) {
 		t.Errorf("nonce: retryable=%v isNonce=%v, want true/true", apperr.IsRetryable(nc), IsNonceConflict(nc))
 	}
 
+	// 비-revert 코드도 친화 메시지 매핑됨(코드 문자열 그대로 아님)
+	to := ClassifyResponse(CodeRPCTimeout, true, cause)
+	if apperr.Code(to) != CodeRPCTimeout || !apperr.IsRetryable(to) {
+		t.Errorf("RPC_TIMEOUT: code=%q retryable=%v", apperr.Code(to), apperr.IsRetryable(to))
+	}
+	if to.Error() == CodeRPCTimeout {
+		t.Errorf("RPC_TIMEOUT 메시지가 코드 그대로임 — 매핑 누락: %q", to.Error())
+	}
+
 	// code 비면 정규식 폴백
 	fb := ClassifyResponse("", true, errors.New("→ 3: AC010"))
 	if apperr.Code(fb) != "AC010" {
