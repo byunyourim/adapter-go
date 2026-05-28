@@ -1,0 +1,3 @@
+DROP TABLE IF EXISTS token_config;
+DROP TABLE IF EXISTS chain_config;
+DROP TABLE IF EXISTS account;
