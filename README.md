@@ -181,6 +181,18 @@ pkgsite -open .                                       # http://localhost:8080
 | `withdraw` | withdraw.request / result / status / confirmed | `Request`, `Result`, `StatusRequest`, `Confirmed` |
 | `payment` | payment.request / result | `Request`, `Result` |
 
+위 15개는 **설계서 부록 B 기준**(신뢰 가능). 아래 5개는 설계서·TS에 정의가 없어
+**컨벤션으로 추론한 초안**이며, 각 파일에 `TODO(설계)`로 표시했다 — WalletBE 실제 계약
+확정 전까지 토픽명·필드를 신뢰하지 말 것.
+
+| 슬라이스 (추론 ⚠️) | 토픽 (추론) | 메시지 구조체 |
+|----------|------|---------------|
+| `balance` | balance.request / result | `Request`, `Result`, `Holding` |
+| `settlement` | settlement.request / result | `Request`, `Result` |
+| `settlementcollect` | settlement.collect.request / result | `Request`, `Result` |
+| `config` | config.register / registered | `RegisterCommand`, `Registered` |
+| `collection` | collection.request / result | `Request`, `Result` |
+
 > 외부 팀(WalletBE)과 공유하는 정식 계약·검증이 필요하면 이 구조체들을 소스로 **AsyncAPI**
 > (`asyncapi.yaml`) 스펙을 따로 만든다 — godoc는 내부 개발용 레퍼런스 역할.
 
