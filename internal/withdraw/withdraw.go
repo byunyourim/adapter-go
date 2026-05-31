@@ -28,7 +28,7 @@ type ResultError struct {
 
 // Request 출금 요청 페이로드(adapter.withdraw.request 인바운드)
 //
-// 설계서 3.3.5 기준. Message Key = from_address(파티션 내 nonce 순서 보장)
+// Message Key = from_address(파티션 내 nonce 순서 보장)
 type Request struct {
 	WTradeNo    string `json:"w_trade_no"`
 	ChainID     int64  `json:"chain_id"`

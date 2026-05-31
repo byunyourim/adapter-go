@@ -1,12 +1,8 @@
 // Package settlementcollect 정산 수금 기능 슬라이스
 // (TS의 application/settlement-collect + in/kafka/handlers/settlement-collect 대응)
 //
-// TODO(설계): 아래 토픽·페이로드는 설계서(부록 B)·TS 원본 어디에도 정의가 없어
-// adapter.<도메인>.<동작> 컨벤션과 유사 토픽을 참고한 초안이다. 수금 대상·금액 등
-// 핵심 필드가 미정이므로 WalletBE 실제 계약 확정 전까지 신뢰하지 말 것
-// (토픽명 settlement.collect 표기도 확정 대상 — settlement_collect 가능성)
-//
-// TODO(골격): account 슬라이스 패턴(service.go/store.go/handler.go) 따라 구현
+// TODO(설계): 토픽·페이로드 정의 출처 없음 — 컨벤션 추론 초안(토픽명 settlement.collect 확정 대상), WalletBE 계약 확정 필요
+// TODO(골격): account 슬라이스 패턴 따라 구현
 package settlementcollect
 
 // Kafka 토픽 — 정산 수금 (방향은 BC Adapter 기준: In=수신, Out=발행)

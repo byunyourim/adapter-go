@@ -24,8 +24,6 @@ type ResultError struct {
 }
 
 // Request 결제 요청 페이로드(adapter.payment.request 인바운드)
-//
-// 설계서 3.4.4 기준
 type Request struct {
 	RequestID   string  `json:"request_id"`
 	TraceID     string  `json:"trace_id"`

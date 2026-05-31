@@ -23,8 +23,7 @@ type Event struct {
 
 // Detected 입금 감지 알림 페이로드(adapter.deposit.detected 아웃바운드)
 //
-// 설계서 3.2.5 기준. WS로 받은 Event 중 등록된 주소 건만 WalletBE로 발행
-// 멱등 키는 (tx_hash, log_index) — 멱등성 보장은 WalletBE 책임
+// 멱등 키 = (tx_hash, log_index), 멱등성 보장은 WalletBE 책임
 type Detected struct {
 	ChainID             int64  `json:"chain_id"`
 	TxHash              string `json:"tx_hash"`

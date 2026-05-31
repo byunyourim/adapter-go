@@ -61,8 +61,7 @@ type DeployResult struct {
 
 // AccountCreateRequest 계정 생성 요청 페이로드(adapter.account.create 인바운드)
 //
-// 설계서 3.1.3 기준. Message Key = userId(사용자 단위 순서 보장)
-// 생성 시 온체인 트랜잭션 없이 CREATE2 주소만 사전 계산(배포는 첫 출금/입금 시 lazy)
+// Message Key = userId(사용자 단위 순서 보장)
 type AccountCreateRequest struct {
 	RequestID   string `json:"request_id"`
 	NetworkType string `json:"network_type"`
