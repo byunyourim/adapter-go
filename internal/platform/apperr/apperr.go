@@ -1,14 +1,8 @@
-// Package apperr 어댑터 공통 에러 체계 (TS의 domain/error/* 이식)
+// Package apperr 어댑터 공통 에러 체계 (TS의 domain/error/* 대응)
 //
-// TS ApplicationError 계층을 Go 단일 구조체 + 카테고리 생성자로 이식
-//   - New          : 기본 (statusCode 500, retryable false)
-//   - NewValidation : 입력 검증 (400)
-//   - NewNotFound   : 미발견 (404)
-//   - NewBusiness   : 비즈니스 규칙 위반 (422)
-//   - NewInfra      : 인프라 장애 (502, retryable true)
-//
-// 에러는 %w/Unwrap으로 cause를 보존, 분류는 errors.As(*AppError)로 판단
-// 구조화 로깅: AppError는 slog.LogValuer라 {code, statusCode, retryable, ...}로 직렬화
+// 단일 구조체 + 카테고리 생성자(New/NewValidation/NewNotFound/NewBusiness/NewInfra)
+// cause는 %w/Unwrap으로 보존, 분류는 errors.As(*AppError)
+// AppError는 slog.LogValuer라 {code, statusCode, retryable, ...}로 직렬화
 package apperr
 
 import (
@@ -116,7 +110,7 @@ var DefaultMessage = map[string]string{
 	CodeUnknownError: "An unexpected error occurred",
 }
 
-// AppError TS ApplicationError 계층 대응 — 카테고리는 StatusCode/Retryable로 구분
+// AppError 카테고리를 StatusCode/Retryable로 구분
 type AppError struct {
 	Code       string
 	StatusCode int
@@ -211,7 +205,6 @@ func NewInfra(code string, cause error) *AppError {
 }
 
 // WrapInfra 예외를 InfraError로 래핑 — 이미 AppError면 그대로 반환
-// (TS wrapInfraError 대응)
 func WrapInfra(err error, code string) error {
 	var ae *AppError
 	if errors.As(err, &ae) {
@@ -232,13 +225,13 @@ func Code(err error) string {
 	return CodeUnknownError
 }
 
-// retryableKeywords 비-AppError 네트워크 에러 판별용 (TS is-retryable RETRYABLE_MESSAGES)
+// retryableKeywords 비-AppError 네트워크 에러 판별용 키워드
 var retryableKeywords = []string{
 	"econnrefused", "econnreset", "etimedout", "enetunreach",
 	"eai_again", "socket hang up", "network error",
 }
 
-// IsRetryable 재시도 가능 여부 판단 (TS isRetryable 대응)
+// IsRetryable 재시도 가능 여부 판단
 // AppError면 Retryable 속성, 그 외 Error는 네트워크 키워드 매칭
 func IsRetryable(err error) bool {
 	if err == nil {

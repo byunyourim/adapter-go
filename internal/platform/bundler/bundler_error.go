@@ -109,7 +109,7 @@ func ClassifyResponse(code string, retryable bool, cause error) *apperr.AppError
 	return apperr.NewBusiness(code, cause).WithMessage(msg)
 }
 
-// IsNonceConflict nonce 경합 에러인지 판단 (TS isNonceConflictError 대응)
+// IsNonceConflict nonce 경합 에러인지 판단
 func IsNonceConflict(err error) bool {
 	var ae *apperr.AppError
 	if errors.As(err, &ae) {

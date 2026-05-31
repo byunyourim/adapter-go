@@ -1,9 +1,5 @@
 package account
 
-// NOTE: 이 파일은 Ent 생성 코드(ent.Client, ent/account)에 의존하므로
-// `make generate`(go generate ./...) 실행 후에만 컴파일
-// Ent API 세부 명칭은 생성 결과에 맞춰 미세 조정될 수 있음
-
 import (
 	"context"
 

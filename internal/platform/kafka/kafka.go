@@ -73,7 +73,7 @@ func NewConsumer(brokers []string, groupID string, dlq Publisher, log *slog.Logg
 	}
 }
 
-// Register 토픽에 핸들러 등록 (TS의 handlers/register 대응)
+// Register 토픽에 핸들러 등록
 func (c *Consumer) Register(topic string, h HandlerFunc) {
 	c.handlers[topic] = h
 }
