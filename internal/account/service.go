@@ -17,7 +17,7 @@ type Locker interface {
 //
 // Deploy 는 멱등이어야 함: 해당 주소에 이미 컨트랙트 코드가 있으면 재전송 없이
 // 기존(또는 빈) txHash를 반환. DB 상태 갱신 실패 후 재처리되는 at-least-once
-// 경로에서 중복 배포(=revert) 트랜잭션을 막기 위함.
+// 경로에서 중복 배포(=revert) 트랜잭션을 막기 위함
 type Deployer interface {
 	Deploy(ctx context.Context, chainID int64, salt, address string) (txHash string, err error)
 	PredictAddress(ctx context.Context, chainID int64, salt string) (string, error)

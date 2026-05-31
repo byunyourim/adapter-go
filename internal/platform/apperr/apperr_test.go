@@ -46,7 +46,7 @@ func TestCode(t *testing.T) {
 	if got := Code(NewBusiness(CodeAlreadyDeployed, nil)); got != CodeAlreadyDeployed {
 		t.Errorf("Code=%q, want %q", got, CodeAlreadyDeployed)
 	}
-	// %w로 래핑돼도 errors.As로 찾는다.
+	// %w로 래핑돼도 errors.As로 찾는다
 	wrapped := fmt.Errorf("context: %w", NewInfra(CodeDBSaveFailed, nil))
 	if got := Code(wrapped); got != CodeDBSaveFailed {
 		t.Errorf("wrapped Code=%q, want %q", got, CodeDBSaveFailed)
@@ -66,7 +66,7 @@ func TestIsRetryable(t *testing.T) {
 	if IsRetryable(NewBusiness(CodeAlreadyDeployed, nil)) {
 		t.Error("business는 non-retryable 기대")
 	}
-	// AppError 아닌 네트워크 에러 키워드 매칭.
+	// AppError 아닌 네트워크 에러 키워드 매칭
 	if !IsRetryable(errors.New("dial tcp: ECONNREFUSED")) {
 		t.Error("ECONNREFUSED는 retryable 기대")
 	}
@@ -76,12 +76,12 @@ func TestIsRetryable(t *testing.T) {
 }
 
 func TestWrapInfra(t *testing.T) {
-	// 이미 AppError면 그대로 통과.
+	// 이미 AppError면 그대로 통과
 	orig := NewBusiness(CodeInsufficientBalance, nil)
 	if got := WrapInfra(orig, CodeDBQueryFailed); got != error(orig) {
 		t.Error("AppError는 그대로 반환 기대")
 	}
-	// 일반 에러는 InfraError로 래핑 + cause 보존.
+	// 일반 에러는 InfraError로 래핑 + cause 보존
 	plain := errors.New("boom")
 	wrapped := WrapInfra(plain, CodeDBQueryFailed)
 	if Code(wrapped) != CodeDBQueryFailed {

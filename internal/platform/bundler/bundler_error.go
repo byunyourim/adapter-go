@@ -1,13 +1,6 @@
 package bundler
 
-// 번들러 에러 세분화. (TS adapter/out/bundler/bundler-error.ts 이식 + 코드 승격)
-//
-// TS에서는 온체인 revert 사유(AC*/EP*/PM*/ethers)를 로그 문자열로만 남기고
-// 에러 자체는 BUNDLER_SEND_FAILED(retryable)로 뭉뚱그렸다. 여기서는 그 사유를
-// 첫급 에러 코드로 승격하고 재시도 가능 여부까지 분류한다:
-//   - revert 사유(잔액 부족·서명 실패·미배포 등) → 비재시도(business) → DLQ
-//   - nonce 충돌 → 재시도(infra)
-//   - 전송/타임아웃/미상 → 재시도(infra, BUNDLER_SEND_FAILED)
+// 번들러 에러를 일급 코드로 분류 — revert는 비재시도(business→DLQ), nonce/RPC/전송은 재시도(infra)
 
 import (
 	"errors"
@@ -17,7 +10,7 @@ import (
 	"github.com/byunyourim/stablecoinbc-adapter/internal/platform/apperr"
 )
 
-// 번들러(tx-error.ts/txerror.go)가 내보내는 비-revert 코드. 번들러와 문자열 일치 필수.
+// 번들러(tx-error.ts/txerror.go)가 내보내는 비-revert 코드. 번들러와 문자열 일치 필수
 const (
 	CodeNonceConflict = "BUNDLER_NONCE_CONFLICT" // nonce 경합 (재시도)
 	CodeSendFailed    = "BUNDLER_SEND_FAILED"    // 미상 전송 실패 (재시도)
@@ -32,9 +25,7 @@ type codeInfo struct {
 	retryable bool
 }
 
-// bundlerCodes 번들러가 내보내는 모든 코드 → 분류.
-// revert(AC*/EP*/PM*/INSUFFICIENT_FUNDS/CALL_EXCEPTION)는 비재시도(business) → DLQ,
-// nonce/RPC/전송 오류는 재시도(infra). 번들러 txerror와 동일 집합이어야 한다.
+// bundlerCodes 분류 테이블 — 번들러 txerror와 동일 집합 유지
 var bundlerCodes = map[string]codeInfo{
 	// Account Contract revert (비재시도)
 	"AC001": {"caller is not EntryPoint", false},
@@ -70,7 +61,6 @@ var (
 )
 
 // parseRevertCode 번들러 에러 문자열에서 알려진 revert 코드 추출
-// (TS parseBundlerErrorCode + formatBundlerError의 reason/code 패턴)
 func parseRevertCode(s string) string {
 	for _, re := range []*regexp.Regexp{reCause, reReason, reCode} {
 		if m := re.FindStringSubmatch(s); m != nil {
@@ -91,7 +81,6 @@ func Classify(cause error) *apperr.AppError {
 
 	if code := parseRevertCode(msg); code != "" {
 		info := bundlerCodes[code]
-		// revert는 비재시도(business). info.retryable이 true인 항목이 생기면 NewInfra로 분기.
 		if info.retryable {
 			return apperr.NewInfra(code, cause).WithMessage(info.message)
 		}
@@ -105,12 +94,9 @@ func Classify(cause error) *apperr.AppError {
 	return apperr.NewInfra(apperr.CodeBundlerSendFailed, cause)
 }
 
-// ClassifyResponse 번들러의 구조화 에러 응답(tx-error.ts)을 AppError로 변환
-// 번들러가 ethers 필드로 이미 정밀 분류한 code/retryable 신뢰(정규식보다 우선)
-// code가 비어 있으면(구버전 응답 등) cause 문자열 기반 Classify로 폴백
+// ClassifyResponse 번들러가 분류한 code/retryable을 AppError로 변환
 //
-//	body: { error, code, category, retryable, txHash } (HTTP) 또는
-//	       JSON-RPC error.data: { code, category, retryable }
+// code가 비면 cause 문자열 기반 Classify로 폴백
 func ClassifyResponse(code string, retryable bool, cause error) *apperr.AppError {
 	if code == "" {
 		return Classify(cause)

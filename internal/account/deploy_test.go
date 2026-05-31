@@ -110,7 +110,7 @@ func TestHandleDeploy_New(t *testing.T) {
 
 func TestHandleDeploy_Idempotent(t *testing.T) {
 	repo := newFakeRepo()
-	// 이미 배포된 계좌 사전 적재.
+	// 이미 배포된 계좌 사전 적재
 	_ = repo.Save(context.Background(), Account{ChainID: 56357, Address: "0xWallet", Salt: "0x01"})
 	_ = repo.MarkDeployed(context.Background(), 56357, "0xWallet", "0xPREV")
 

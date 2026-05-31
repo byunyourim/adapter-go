@@ -11,7 +11,7 @@ import (
 	"math/big"
 )
 
-// Kafka 토픽 — 계정 생명주기 (방향은 BC Adapter 기준: In=수신, Out=발행)
+// Kafka 토픽 — 계정 생명주기 (In=수신, Out=발행)
 const (
 	TopicCreate   = "adapter.account.create"   // In  계정 생성 요청
 	TopicCreated  = "adapter.account.created"  // Out 계정 생성 결과
@@ -23,20 +23,19 @@ const (
 type Account struct {
 	ChainID      int64
 	Address      string // EIP-55 checksum
-	Salt         string // CREATE2 salt
+	Salt         string
 	Deployed     bool
 	DeployTxHash string
 	PredictedAt  string
 }
 
-// DeployCommand 지갑 배포 명령(Kafka 인바운드)
+// DeployCommand 지갑 배포 명령
 type DeployCommand struct {
 	ChainID int64  `json:"chain_id"`
 	Address string `json:"address"`
 	Salt    string `json:"salt"`
 }
 
-// validate 명령 필수 필드 검증
 func (c DeployCommand) validate() error {
 	if c.ChainID == 0 {
 		return errors.New("chainId is required")
@@ -50,7 +49,7 @@ func (c DeployCommand) validate() error {
 	return nil
 }
 
-// DeployResult 배포 처리 결과(Kafka 아웃바운드)
+// DeployResult 배포 처리 결과
 type DeployResult struct {
 	ChainID int64    `json:"chain_id"`
 	Address string   `json:"address"`
@@ -59,7 +58,7 @@ type DeployResult struct {
 	Success bool     `json:"success"`
 }
 
-// AccountCreateRequest 계정 생성 요청 페이로드(adapter.account.create 인바운드)
+// AccountCreateRequest 계정 생성 요청 페이로드
 //
 // Message Key = userId(사용자 단위 순서 보장)
 type AccountCreateRequest struct {
@@ -67,8 +66,8 @@ type AccountCreateRequest struct {
 	NetworkType string `json:"network_type"`
 }
 
-// AccountCreatedResult 계정 생성 결과 페이로드(adapter.account.created 아웃바운드)
+// AccountCreatedResult 계정 생성 결과 페이로드
 type AccountCreatedResult struct {
 	RequestID string `json:"request_id"`
-	Address   string `json:"address"` // EIP-55 checksum 사전 계산 주소
+	Address   string `json:"address"`
 }

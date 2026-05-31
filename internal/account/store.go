@@ -12,7 +12,7 @@ import (
 )
 
 // Store account 영속 구현(Ent). Repository 인터페이스를 만족
-// 돈이 걸린 핵심 경로는 Ent 트랜잭션(client.Tx) 또는 raw SQL로 명시 제어.
+// 돈이 걸린 핵심 경로는 Ent 트랜잭션(client.Tx) 또는 raw SQL로 명시 제어
 type Store struct {
 	client *ent.Client
 }
@@ -38,7 +38,7 @@ func (s *Store) Get(ctx context.Context, chainID int64, address string) (Account
 
 // Save 계좌 저장(이미 있으면 무시 — 멱등)
 // deploy.go의 체인 단위 락 안에서 호출되므로 check-then-create가 안전하며,
-// 최종 방어는 (chain_id, address) 유니크 인덱스다.
+// 최종 방어는 (chain_id, address) 유니크 인덱스다
 func (s *Store) Save(ctx context.Context, a Account) error {
 	if _, ok, err := s.Get(ctx, a.ChainID, a.Address); err != nil {
 		return err

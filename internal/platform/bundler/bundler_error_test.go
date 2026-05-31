@@ -59,7 +59,7 @@ func TestClassify_NilReturnsNil(t *testing.T) {
 	}
 }
 
-// 번들러 구조화 응답(tx-error.ts)을 신뢰해 분류.
+// 번들러 구조화 응답(tx-error.ts)을 신뢰해 분류
 func TestClassifyResponse_StructuredFields(t *testing.T) {
 	cause := errors.New("bundler 422")
 

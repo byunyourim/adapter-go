@@ -21,7 +21,7 @@ type Event struct {
 	Status    string // TXCF / TXPD
 }
 
-// Detected 입금 감지 알림 페이로드(adapter.deposit.detected 아웃바운드)
+// Detected 입금 감지 알림 페이로드
 //
 // 멱등 키 = (tx_hash, log_index), 멱등성 보장은 WalletBE 책임
 type Detected struct {
@@ -31,7 +31,7 @@ type Detected struct {
 	ToAddress           string `json:"to_address"`
 	Amount              string `json:"amount"`        // 최소 단위 정수 문자열
 	Status              string `json:"status"`        // DETECTED / PENDING_CONFIRMATION / CONFIRMED / FAILED
-	ConfirmCount        string `json:"confirm_count"` // 설계서상 문자열("10")
+	ConfirmCount        string `json:"confirm_count"` // 문자열("10")
 	Symbol              string `json:"symbol"`
 	TransactionDatetime string `json:"transaction_datetime"` // yyyyMMddHHmmss
 }

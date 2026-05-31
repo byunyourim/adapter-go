@@ -6,21 +6,19 @@
 // TODO(골격): account 슬라이스 패턴 따라 구현
 package config
 
-// Kafka 토픽 — 체인/토큰 설정 등록 (방향은 BC Adapter 기준: In=수신, Out=발행)
+// Kafka 토픽 — 체인/토큰 설정 등록 (In=수신, Out=발행)
 const (
 	TopicRegister   = "adapter.config.register"   // In  설정 등록 요청
 	TopicRegistered = "adapter.config.registered" // Out 설정 등록 결과
 )
 
-// RegisterCommand 체인/토큰 설정 등록 명령(adapter.config.register 인바운드)
-//
-// TODO(설계): RPC URL·토큰 컨트랙트·심볼·decimals 등 등록 필드 미정
+// RegisterCommand 체인/토큰 설정 등록 명령
 type RegisterCommand struct {
 	RequestID string `json:"request_id"`
 	ChainID   int64  `json:"chain_id"`
 }
 
-// Registered 설정 등록 결과(adapter.config.registered 아웃바운드)
+// Registered 설정 등록 결과
 type Registered struct {
 	RequestID string `json:"request_id"`
 	ChainID   int64  `json:"chain_id"`

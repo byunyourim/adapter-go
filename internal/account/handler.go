@@ -9,7 +9,7 @@ import (
 // KafkaHandler account 관련 Kafka 메시지를 디코드해 Service로 라우팅
 // (TS의 adapter/in/kafka/handlers/account-*.handler.ts 대응)
 //
-// 인바운드 어댑터는 역직렬화/검증만 담당하고 도메인 로직은 Service에 위임.
+// 인바운드 어댑터는 역직렬화/검증만 담당하고 도메인 로직은 Service에 위임
 type KafkaHandler struct {
 	svc *Service
 }
@@ -24,7 +24,7 @@ func NewKafkaHandler(svc *Service) *KafkaHandler {
 func (h *KafkaHandler) HandleDeployMessage(ctx context.Context, payload []byte) error {
 	var cmd DeployCommand
 	if err := json.Unmarshal(payload, &cmd); err != nil {
-		// 파싱 불가 메시지는 재시도해도 동일 실패 — consumer가 DLQ로 보내야 한다.
+		// 파싱 불가 메시지는 재시도해도 동일 실패 — consumer가 DLQ로 보내야 한다
 		return fmt.Errorf("배포 메시지 파싱 실패: %w", err)
 	}
 	if err := cmd.validate(); err != nil {

@@ -41,7 +41,7 @@ func TestPinoLabelMapping(t *testing.T) {
 	}
 }
 
-// TS 어댑터 pino 포맷 검증: level은 문자열 라벨, time은 KST ISO(+09:00), module 포함.
+// TS 어댑터 pino 포맷 검증: level은 문자열 라벨, time은 KST ISO(+09:00), module 포함
 func TestJSONOutputMatchesTSAdapter(t *testing.T) {
 	var buf bytes.Buffer
 	log := build(&buf, "adapter", slog.LevelInfo, false)

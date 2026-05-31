@@ -14,7 +14,7 @@ type Config struct {
 
 	DeployLockTTL time.Duration `env:"DEPLOY_LOCK_TTL_MS" envDefault:"30s"`
 
-	// 로깅 — TS 어댑터와 동일 기본값. 운영(ELK)에서는 LOG_PRETTY=false로 JSON 출력.
+	// 로깅 — TS 어댑터와 동일 기본값. 운영(ELK)에서는 LOG_PRETTY=false로 JSON 출력
 	LogLevel  string `env:"LOG_LEVEL" envDefault:"debug"`
 	LogPretty bool   `env:"LOG_PRETTY" envDefault:"true"`
 }

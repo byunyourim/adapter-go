@@ -17,7 +17,7 @@ import (
 	"strings"
 )
 
-// ErrorCode 상수 — TS domain/error/error-code.ts와 1:1.
+// ErrorCode 상수 — TS domain/error/error-code.ts와 1:1
 const (
 	// Validation
 	CodeValidationError      = "VALIDATION_ERROR"

@@ -27,7 +27,7 @@ var kst = time.FixedZone("KST", 9*60*60)
 var hostname = resolveHostname()
 
 // New TS 어댑터 pino 포맷과 동일한 구조화 로거 생성
-// level/pretty는 config(env)에서 받아 주입한다(process.env 직접 접근 금지 원칙).
+// level/pretty는 config(env)에서 받아 주입한다(process.env 직접 접근 금지 원칙)
 func New(module string, level slog.Level, pretty bool) *slog.Logger {
 	return build(os.Stdout, module, level, pretty)
 }

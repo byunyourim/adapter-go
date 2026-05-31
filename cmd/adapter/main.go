@@ -3,7 +3,7 @@
 // 인바운드: Listener로부터 WebSocket 입금 이벤트, Kafka 명령(출금/정산/계좌 등)
 // 아웃바운드: 블록체인(go-ethereum), 외부 번들러, Kafka 결과 발행, Redis 분산락
 //
-// 아키텍처(패키지 by 기능 + 이벤트 드리븐)와 지갑 배포 비동기화는 README.md 참고.
+// 아키텍처(패키지 by 기능 + 이벤트 드리븐)와 지갑 배포 비동기화는 README.md 참고
 package main
 
 import (

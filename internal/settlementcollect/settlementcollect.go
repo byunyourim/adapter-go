@@ -5,13 +5,13 @@
 // TODO(골격): account 슬라이스 패턴 따라 구현
 package settlementcollect
 
-// Kafka 토픽 — 정산 수금 (방향은 BC Adapter 기준: In=수신, Out=발행)
+// Kafka 토픽 — 정산 수금 (In=수신, Out=발행)
 const (
 	TopicRequest = "adapter.settlement.collect.request" // In  정산 수금 요청
 	TopicResult  = "adapter.settlement.collect.result"  // Out 정산 수금 결과
 )
 
-// Request 정산 수금 요청 페이로드(adapter.settlement.collect.request 인바운드)
+// Request 정산 수금 요청 페이로드
 //
 // TODO(설계): 수금 대상·금액·자산 등 필드 미정
 type Request struct {
@@ -21,7 +21,7 @@ type Request struct {
 	ToAddress   string `json:"to_address"`
 }
 
-// Result 정산 수금 결과 페이로드(adapter.settlement.collect.result 아웃바운드)
+// Result 정산 수금 결과 페이로드
 type Result struct {
 	RequestID string  `json:"request_id"`
 	Status    string  `json:"status"` // SUBMITTED / CONFIRMED / FAILED
