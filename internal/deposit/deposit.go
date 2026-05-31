@@ -7,7 +7,10 @@ package deposit
 
 import "context"
 
-// Event Listener가 보낸 입금 이벤트
+// TopicDetected 입금 감지 알림 토픽(아웃바운드, BC Adapter → WalletBE)
+const TopicDetected = "adapter.deposit.detected"
+
+// Event Listener가 보낸 입금 이벤트(WebSocket 인바운드, 내부 표현)
 type Event struct {
 	ChainID   int64
 	TxHash    string
@@ -16,6 +19,22 @@ type Event struct {
 	Amount    string
 	Symbol    string
 	Status    string // TXCF / TXPD
+}
+
+// Detected 입금 감지 알림 페이로드(adapter.deposit.detected 아웃바운드)
+//
+// 설계서 3.2.5 기준. WS로 받은 Event 중 등록된 주소 건만 WalletBE로 발행
+// 멱등 키는 (tx_hash, log_index) — 멱등성 보장은 WalletBE 책임
+type Detected struct {
+	ChainID             int64  `json:"chain_id"`
+	TxHash              string `json:"tx_hash"`
+	FromAddress         string `json:"from_address"`
+	ToAddress           string `json:"to_address"`
+	Amount              string `json:"amount"`        // 최소 단위 정수 문자열
+	Status              string `json:"status"`        // DETECTED / PENDING_CONFIRMATION / CONFIRMED / FAILED
+	ConfirmCount        string `json:"confirm_count"` // 설계서상 문자열("10")
+	Symbol              string `json:"symbol"`
+	TransactionDatetime string `json:"transaction_datetime"` // yyyyMMddHHmmss
 }
 
 // DeployRequester 미배포 지갑 배포를 비동기 요청 (account 슬라이스로 위임)

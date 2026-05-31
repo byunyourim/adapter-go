@@ -11,6 +11,14 @@ import (
 	"math/big"
 )
 
+// Kafka 토픽 — 계정 생명주기 (방향은 BC Adapter 기준: In=수신, Out=발행)
+const (
+	TopicCreate   = "adapter.account.create"   // In  계정 생성 요청
+	TopicCreated  = "adapter.account.created"  // Out 계정 생성 결과
+	TopicDeploy   = "adapter.account.deploy"   // In  계정 배포 요청
+	TopicDeployed = "adapter.account.deployed" // Out 계정 배포 결과
+)
+
 // Account 입금 지갑 계좌 도메인 모델
 type Account struct {
 	ChainID      int64
@@ -23,7 +31,7 @@ type Account struct {
 
 // DeployCommand 지갑 배포 명령(Kafka 인바운드)
 type DeployCommand struct {
-	ChainID int64  `json:"chainId"`
+	ChainID int64  `json:"chain_id"`
 	Address string `json:"address"`
 	Salt    string `json:"salt"`
 }
@@ -44,9 +52,24 @@ func (c DeployCommand) validate() error {
 
 // DeployResult 배포 처리 결과(Kafka 아웃바운드)
 type DeployResult struct {
-	ChainID int64    `json:"chainId"`
+	ChainID int64    `json:"chain_id"`
 	Address string   `json:"address"`
-	TxHash  string   `json:"txHash"`
+	TxHash  string   `json:"tx_hash"`
 	Gas     *big.Int `json:"gas,omitempty"`
 	Success bool     `json:"success"`
+}
+
+// AccountCreateRequest 계정 생성 요청 페이로드(adapter.account.create 인바운드)
+//
+// 설계서 3.1.3 기준. Message Key = userId(사용자 단위 순서 보장)
+// 생성 시 온체인 트랜잭션 없이 CREATE2 주소만 사전 계산(배포는 첫 출금/입금 시 lazy)
+type AccountCreateRequest struct {
+	RequestID   string `json:"request_id"`
+	NetworkType string `json:"network_type"`
+}
+
+// AccountCreatedResult 계정 생성 결과 페이로드(adapter.account.created 아웃바운드)
+type AccountCreatedResult struct {
+	RequestID string `json:"request_id"`
+	Address   string `json:"address"` // EIP-55 checksum 사전 계산 주소
 }

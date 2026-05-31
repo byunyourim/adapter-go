@@ -131,7 +131,7 @@ go get github.com/caarlos0/env/v11
 go mod tidy
 
 # Ent 스키마 정의(ent/schema/) 후 코드 생성
-make generate
+make generate                 # 워크스페이스(go.work)에선 GOWORK=off go generate ./...
 
 cp .env.example .env          # 값 채우기
 export DATABASE_URL="postgres://..."
@@ -140,10 +140,49 @@ make migrate-up               # Ent/atlas 마이그레이션
 make build && make test
 ```
 
-> 현재 상태: **골격(skeleton)**. `account`/`deposit` 슬라이스와 platform 패키지의
-> 인터페이스·구조체만 정의돼 있고, 나머지 기능 슬라이스는 패키지 선언만 있다.
-> 구현부는 `panic("not implemented")` 또는 `TODO(골격)` 표시.
+> 현재 상태: **골격(skeleton)**. `account`/`deposit` 슬라이스의 서비스·저장소와 platform
+> 인터페이스가 정의돼 있고, **Kafka 토픽 상수·메시지 페이로드 구조체**는
+> `account`/`deposit`/`confirm`/`withdraw`/`payment` 슬라이스에 정의돼 있다(아래 "문서 보기" 참고).
+> 서비스 로직 등 나머지 구현부는 `panic("not implemented")` 또는 `TODO(골격)` 표시.
 > 새 기능은 `account/`의 5파일 패턴(domain·service·deploy/usecase·store·handler)을 따라 추가한다.
+
+---
+
+## 문서 보기 (godoc / pkgsite)
+
+별도 문서 파일을 두지 않고 **코드의 doc 주석이 곧 API 문서**다(Go 표준 방식). Kafka
+토픽·페이로드도 각 슬라이스에 토픽 상수 + 메시지 구조체로 정의돼 있어, 아래로 바로 확인한다.
+
+```bash
+# 터미널에서 (설치 불필요)
+go doc ./internal/withdraw          # 패키지 요약 — 토픽 상수 + 메시지 구조체 목록
+go doc ./internal/withdraw.Request  # 특정 페이로드 구조체(필드·json 태그·주석)
+
+# 브라우저에서 (pkg.go.dev와 동일한 UI, 로컬 서버)
+go install golang.org/x/pkgsite/cmd/pkgsite@latest   # 최초 1회
+pkgsite -open .                                       # http://localhost:8080
+```
+
+> `pkgsite` 명령을 못 찾으면 PATH 문제다. `~/go/bin/pkgsite -open .` 로 전체 경로 실행하거나,
+> `export PATH="$PATH:$(go env GOPATH)/bin"` 를 `~/.zshrc` 에 추가한다.
+> `internal/` 은 비공개 패키지라 목록에서 가려질 수 있으나 직접 URL로는 열린다:
+> `http://localhost:8080/github.com/byunyourim/stablecoinbc-adapter/internal/withdraw`
+
+### Kafka 토픽 계약이 정의된 위치
+
+토픽명은 `adapter.<도메인>.<동작>`, 페이로드 필드는 **snake_case**로 통일. 방향은 BC Adapter
+기준(In=수신 / Out=발행). 부록 B의 15개 토픽을 도메인 슬라이스에 배치했다.
+
+| 슬라이스 | 토픽 | 메시지 구조체 |
+|----------|------|---------------|
+| `account` | account.create / created / deploy / deployed | `AccountCreateRequest`, `AccountCreatedResult`, `DeployCommand`, `DeployResult` |
+| `deposit` | deposit.detected | `Detected` |
+| `confirm` | deposit.confirm / confirmed, common.confirm / confirmed | `Request`, `Result` (deposit·common 공용) |
+| `withdraw` | withdraw.request / result / status / confirmed | `Request`, `Result`, `StatusRequest`, `Confirmed` |
+| `payment` | payment.request / result | `Request`, `Result` |
+
+> 외부 팀(WalletBE)과 공유하는 정식 계약·검증이 필요하면 이 구조체들을 소스로 **AsyncAPI**
+> (`asyncapi.yaml`) 스펙을 따로 만든다 — godoc는 내부 개발용 레퍼런스 역할.
 
 ---
 
