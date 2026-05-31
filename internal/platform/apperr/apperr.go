@@ -1,8 +1,4 @@
 // Package apperr 어댑터 공통 에러 체계 (TS의 domain/error/* 대응)
-//
-// 단일 구조체 + 카테고리 생성자(New/NewValidation/NewNotFound/NewBusiness/NewInfra)
-// cause는 %w/Unwrap으로 보존, 분류는 errors.As(*AppError)
-// AppError는 slog.LogValuer라 {code, statusCode, retryable, ...}로 직렬화
 package apperr
 
 import (

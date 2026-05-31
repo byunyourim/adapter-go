@@ -1,13 +1,6 @@
 // Package logger 구조화 로깅 제공 (TS의 infra/logger = pino 대응)
 //
-// 운영 로그는 ELK로 수집된다. 기존 TS 어댑터의 pino 출력 포맷에 맞춰 JSON 필드를 낸다:
-//   - level    : 문자열 라벨 (trace/debug/info/warn/error)  ← pino formatters.level
-//   - time     : KST ISO8601 문자열 "2006-01-02T15:04:05.000+09:00"
-//   - msg      : 메시지 (slog 기본 키 == pino)
-//   - module   : 로거(모듈) 이름  ← TS child({module})
-//   - pid, hostname : pino 기본 필드
-//
-// LOG_PRETTY 개발 모드에서는 사람이 읽는 text 핸들러(ELK용 아님)로 전환
+// 운영(ELK)은 pino 포맷 호환 JSON, LOG_PRETTY면 text 핸들러로 전환
 package logger
 
 import (
