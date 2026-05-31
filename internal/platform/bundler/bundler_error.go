@@ -1,7 +1,5 @@
 package bundler
 
-// 번들러 에러를 일급 코드로 분류 — revert는 비재시도(business→DLQ), nonce/RPC/전송은 재시도(infra)
-
 import (
 	"errors"
 	"regexp"
