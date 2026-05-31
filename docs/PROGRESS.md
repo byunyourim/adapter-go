@@ -27,6 +27,7 @@
 - `platform/apperr` — 에러 코드 체계 (테스트 있음)
 - `platform/bundler` — 번들러 에러 분류 (테스트 있음)
 - `platform/logger` — pino 호환 구조화 로깅(JSON, ELK용) (테스트 있음)
+- `platform/kafka` — Producer/Consumer 구현 (kafka-go, at-least-once: 핸들러 성공 후 commit, 실패 시 DLQ, Murmur2 파티셔너로 kafkajs 호환) (테스트 있음)
 - `ent/` — ORM 코드 생성 완료 (`ent/schema/account.go` → 클라이언트·쿼리)
 
 ---
@@ -34,7 +35,6 @@
 ## ⏳ 미구현 (골격만 있음 — `panic("not implemented")` / `TODO`)
 
 ### 인프라 (platform/) — **다른 모든 작업의 전제**
-- `platform/kafka` — Producer/Consumer 가 `panic`. **Kafka 실제 송수신·offset commit·DLQ 미구현**
 - `platform/postgres` — 풀 생성
 - `platform/redis` — 분산락(nonce 격리)
 - `platform/blockchain` — go-ethereum RPC 클라이언트
@@ -53,8 +53,9 @@
 
 ## 📋 다음 작업 (우선순위)
 
-1. **`platform/kafka` 구현** — Producer/Consumer 실제 동작(kafka-go Reader 루프, 핸들러 성공 후 offset commit, 실패 시 DLQ). 모든 슬라이스가 여기에 의존하므로 최우선.
-2. **인프라 클라이언트 구현** — `postgres` / `redis` / `blockchain` / `bundler` / `env`.
+1. ~~`platform/kafka` 구현~~ ✅ 완료 (Producer/Consumer, at-least-once + DLQ, 테스트).
+   남은 보강: 일시적 실패 재시도(현재는 핸들러 내부 책임), DLQ 토픽 사전 생성, ClientID(KAFKA_CLIENT_ID) 적용.
+2. **인프라 클라이언트 구현** — `postgres` / `redis` / `blockchain` / `bundler` / `env`. (다음 최우선)
 3. **`cmd/adapter/main.go` wiring** — 의존성 주입 + Kafka consumer에 슬라이스별 핸들러(토픽 상수) 라우팅 등록.
 4. **도메인 슬라이스 서비스 구현** (`account` 5파일 패턴 따라). 설계서가 명확한 순서로:
    `deposit` → `withdraw` → `payment` → `confirm`.
